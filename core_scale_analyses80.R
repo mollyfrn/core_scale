@@ -361,7 +361,7 @@ bbs_allscales = read.csv("intermed/bbs_allscales80.csv", header = TRUE)
 levels(bbs_allscales$scale)
 unique(bbs_allscales$scale)
 length(unique(bbs_allscales$focalrte))
-bbs_allscales = na.omit(bbs_allscales) #from 66792 to 66792 when maxdist left out so 
+#bbs_allscales = na.omit(bbs_allscales) #from 66792 to 66792 when maxdist left out so 
 #oh we DO want to cut out the below-route stuff bc we can't do the env analyses on these period
 length(unique(bbs_allscales$focalrte)) #983 rtes, 62920 obs
 bbs_allscales2 = bbs_allscales %>% dplyr::select(-scale, -maxdist)
