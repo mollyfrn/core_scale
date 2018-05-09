@@ -103,7 +103,8 @@ env_all = read.csv("intermed/env_all.csv", header = TRUE)
 core_env_coefs = env_all %>%
   inner_join(core_coefs, by = "stateroute") %>%
   dplyr::select(stateroute, scale, area, ndvi.var, elev.var, PCA.min, PCA.max, PCA.slope, PCA.mid, PCA.curvature,
-         PCN.min, PCN.max, PCN.slope, PCN.mid, PCN.curvature)
+         PCN.min, PCN.max, PCN.slope, PCN.mid, PCN.curvature) %>% 
+  filter(scale > 2) #ensure env analyses only happening with 2+ agg routes
 write.csv(core_env_coefs, "intermed/core_env_coefs.csv", row.names = FALSE)
 #updated 05/07
 
