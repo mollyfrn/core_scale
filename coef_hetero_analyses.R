@@ -106,7 +106,7 @@ core_env_coefs = env_all %>%
          PCN.min, PCN.max, PCN.slope, PCN.mid, PCN.curvature) %>% 
   filter(scale > 2) #ensure env analyses only happening with 2+ agg routes
 write.csv(core_env_coefs, "intermed/core_env_coefs.csv", row.names = FALSE)
-#updated 05/07
+#updated 05/09
 
 
 ####Coef & habitat heterogeneity models####
