@@ -397,7 +397,7 @@ scales_hetero2 = scales_hetero %>%
 
 ggplot(scales_hetero2, aes(x = ind, y = corr_r))+
   geom_pointrange(aes(color = dep, shape = dep, ymin = lowr, ymax = uppr), size = 1.2, position = position_dodge(width = 0.35))+geom_abline(intercept = 0, slope = 0)+
-  theme_classic()+theme(axis.title = element_text(size = 18), axis.text = element_text(size = 16), legend.position = c(0.55, 0.25), legend.text = element_text(size = 16), legend.title = element_text(size = 16))+
+  theme_classic()+theme(axis.title = element_text(size = 18), axis.text = element_text(size = 16), legend.position = c(0.45, 0.25), legend.text = element_text(size = 16), legend.title = element_text(size = 16))+
   labs(x = "Occupancy-scale parameters", y = "Pearson's correlation coefficient")+
   scale_x_discrete(limit = c("PCA.min", "PCA.mid","PCA.slope","PCA.curvature","PCA.max"),
                    labels = c(expression("p"["min"]), expression("Scale"[50]),"Slope","Curvature",expression("p"["max"])))+

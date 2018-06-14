@@ -360,7 +360,7 @@ bbs_allscales = read.csv("intermed/bbs_allscales.csv", header = TRUE)
 levels(bbs_allscales$scale)
 unique(bbs_allscales$scale)
 length(unique(bbs_allscales$scale))
-bbs_allscales2 = na.omit(bbs_allscales) #from 67827 to 67827 when maxdist left out so 
+#bbs_allscales2 = na.omit(bbs_allscales) #from 67827 to 67827 when maxdist left out so 
 #oh we DO want to cut out the below-route stuff bc we can't do the env analyses on these period
 length(unique(bbs_allscales$focalrte)) #983 rtes, 62920 obs
 #try taking out columns 2 and 7, select(-scale, -maxdist)
