@@ -2,13 +2,13 @@
 # author: Molly F. Jenkins
 # updated: 05/03/2017
 
-# Summary: The following script demonstrates the first original cutoffs of >2/3 and <1/3, which can be viewed in the core_scale_analyses.R script. 
+# Summary: The following script demonstrates the first original cutoffs of >2/3 and <1/3, 
+# which can be viewed in the core_scale_analyses.R script. 
 #This script explores cutoffs of: 2/3 $ 1/3 (original occ-scale-processing and creation of bbs_allscales.csv data)
 #The supplemental cutoff scripts can be viewed in allscales_coefs50.R and allscales_coefs80.R
 ###################################################################################################################
 
 # setwd("C:/git/core_scale")
-
 # Please download and install the following packages:
 library(raster)
 library(tidyverse)
