@@ -267,6 +267,7 @@ all_fig$area_spec[all_fig$area_spec != 4] <- 0
 all_fig$area_spec = factor(all_fig$area_spec)
 
 
+#make sure legend includes both color and dash 
 all_figplot = ggplot(all_fig, aes(occ, group = area_f, color = area_f, linetype = area_spec))+
   stat_density(geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
   #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
@@ -274,7 +275,7 @@ all_figplot = ggplot(all_fig, aes(occ, group = area_f, color = area_f, linetype 
   scale_color_viridis(discrete = TRUE, name = expression("Spatial Scale in km"^{2}))+
   theme(axis.title = element_text(size = 18), axis.text = element_text(size = 16))+
   theme(legend.text = element_text(size = 16), legend.title = element_text(size = 16))+
-  theme(legend.position = c(0.50, 0.50))+guides(linetype = FALSE)
+  theme(legend.position = c(0.50, 0.50))+guides(linetype = FALSE) #suppresses 2nd legend - find way to merge
 all_figplot
 ggsave(file = "output/Figure4.tiff", plot = all_figplot)
 
@@ -338,7 +339,7 @@ bbs_allsub2$focalrte = factor(bbs_allsub2$focalrte,
 pred_plot = ggplot(bbs_allscales, aes(x = logA, y = pctCore))+geom_line(aes(group = focalrte), color = "grey")+
   theme_classic()+geom_abline(aes(intercept = 0.5, slope = 0), linetype = "dashed")+
   geom_line(data = bbs_allsub2, aes(x = logA, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
-  labs(x = "Log Area", y = "", title = "A")+
+  labs(x = expression("Log"[10]*" Area"), y = "", title = "A")+
   scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
   theme(plot.title = element_text(size = 20), axis.title = element_text(size = 18), axis.text = element_text(size = 16), legend.text = element_text(size = 14), legend.title = element_text(size = 14))+
   theme(legend.position = c(0.74, 0.18)) 
@@ -374,7 +375,7 @@ bbs_allsub3$focalrte = factor(bbs_allsub3$focalrte,
 pred_abuns = ggplot(bbs_allscales, aes(x = logN, y = pctCore))+geom_line(aes(group = focalrte), color = "grey")+
   theme_classic()+geom_abline(aes(intercept = 0.5, slope = 0), linetype = "dashed")+
   geom_line(data = bbs_allsub3, aes(x = logN, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
-  labs(x = "Log Community size", y = "", title = "B")+
+  labs(x = expression("Log"[10]*" Community Size"), y = "", title = "B")+
   scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
   theme(plot.title = element_text(size = 20), axis.title = element_text(size = 18), axis.text = element_text(size = 16), legend.text = element_text(size = 14), legend.title = element_text(size = 14))+
   theme(legend.position = "none") 
@@ -396,16 +397,20 @@ scales_hetero2 = scales_hetero %>%
   filter(ind == "PCA.curvature" | ind == "PCA.max" | ind == "PCA.mid"| ind == "PCA.min" | ind == "PCA.slope")
 
 ggplot(scales_hetero2, aes(x = ind, y = corr_r))+
-  geom_pointrange(aes(color = dep, shape = dep, ymin = lowr, ymax = uppr), size = 1.2, position = position_dodge(width = 0.35))+geom_abline(intercept = 0, slope = 0)+
-  theme_classic()+theme(axis.title = element_text(size = 18), axis.text = element_text(size = 16), legend.position = c(0.45, 0.25), legend.text = element_text(size = 16), legend.title = element_text(size = 16))+
+  geom_pointrange(aes(color = dep, shape = dep, ymin = lowr, ymax = uppr), size = 2.0, position = position_dodge(width = 0.5))+geom_abline(intercept = 0, slope = 0)+
+  theme_classic()+theme(axis.title = element_text(size = 36), axis.text = element_text(size = 32, color = "black"), 
+                        legend.position = c(0.45, 0.3), legend.text = element_text(size = 30), 
+                        legend.title = element_text(size = 32), 
+                        legend.key = element_rect(size = 4, color = 'white'),
+                        legend.key.size = unit(2, 'lines'))+
   labs(x = "Occupancy-scale parameters", y = "Pearson's correlation coefficient")+
   scale_x_discrete(limit = c("PCA.min", "PCA.mid","PCA.slope","PCA.curvature","PCA.max"),
-                   labels = c(expression("p"["min"]), expression("Scale"[50]),"Slope","Curvature",expression("p"["max"])))+
+                   labels = c(expression("p"["min"]), expression("scale"[50]),"slope","curvature",expression("p"["max"])))+
   scale_y_continuous(breaks = c(-0.6, -0.4, -0.2, 0, 0.2, 0.4))+
-  scale_color_manual(name = "Environmental Heterogeneity",
+  scale_color_manual(name = expression("Environmental \nHeterogeneity"),
                      values=c("#440154FF", "#55C667FF"),
                      labels = c("Elevation", "NDVI"))+
-  scale_shape_manual(name = "Environmental Heterogeneity",
+  scale_shape_manual(name = expression("Environmental \nHeterogeneity"),
                      values=c(16, 17),
                      labels = c("Elevation", "NDVI"))
 #likely #440154FF purple and #55C667FF
@@ -418,7 +423,7 @@ scales_hetero_v = scales_hetero %>%
 
 scales_hetero_v$ind = factor(scales_hetero_v$ind, 
                              levels = c("PCA.min","PCA.mid", "PCA.slope","PCA.curvature", "PCA.max"),
-                             labels = c(as.character(expression("p"["min"])), as.character(expression("Scale"[50])), "Slope", "Curvature", as.character(expression("p"["max"]))))
+                             labels = c(as.character(expression("p"["min"])), as.character(expression("scale"[50])), "slope", "curvature", as.character(expression("p"["max"]))))
 
 scales_hetero_v$dep = factor(scales_hetero_v$dep, 
                              levels=c("elev.var", "ndvi.var"),
@@ -426,11 +431,15 @@ scales_hetero_v$dep = factor(scales_hetero_v$dep,
 
 #scale on x and r on y, panel by coef of interest, line color by var measure
 ggplot(scales_hetero_v, aes(x = scale, y = corr_r))+
-  geom_line(aes(color = dep), size = 1.4)+facet_wrap(~ind, labeller = label_parsed)+
-  theme_classic()+
+  geom_line(aes(color = dep), size = 2.2)+facet_wrap(~ind, labeller = label_parsed)+
+  theme_bw()+
   geom_abline(intercept = 0, slope = 0)+
-  theme_classic()+theme(text = element_text(size = 18))+
-  labs(color = "Environmental Heterogeneity", x = "Number of aggregated BBS Routes", y = "Pearson's correlation coefficient")+theme(legend.position = c(0.84, 0.20))+
+  theme_classic()+theme(panel.spacing = unit(2, "lines"), strip.background = element_rect(size = 2), strip.text.x = element_text(size = 30), axis.title = element_text(size = 32), axis.text = element_text(size = 30, color = "black"), 
+                        legend.position = c(0.45, 0.3), legend.text = element_text(size = 30), 
+                        legend.title = element_text(size = 32), 
+                        legend.key = element_rect(size = 4, color = 'white'),
+                        legend.key.size = unit(2, 'lines'))+
+  labs(color = expression("Environmental \nHeterogeneity"), x = "Number of aggregated BBS Routes", y = "Pearson's correlation coefficient")+theme(legend.position = c(0.84, 0.20))+
   scale_color_viridis(begin = 0, end = 0.7, discrete = TRUE, option = "D")+
   scale_y_continuous(breaks = c(-0.6, -0.4, -0.2, 0, 0.2, 0.4))
 ggsave(file = "output/Figure7.tiff", plot = last_plot())
