@@ -4,6 +4,7 @@ library(tidyverse)
 library(sp)
 library(raster)
 library(rgdal)
+library(gimms)
 
 library(maptools)
 library(rgeos)
@@ -12,7 +13,6 @@ library(nlme)
 library(gridExtra)
 library(wesanderson)
 library(stats)
-library(gimms)
 library(devtools)
 library(geometry)
 library(DBI)
@@ -116,8 +116,26 @@ env_elev = data.frame(routes = routes.laea,
 
 write.csv(env_elev, "intermed/env_elev.csv", row.names = FALSE)
 
-#ndvi 
+#ndvi - DIFFICULTIES WITH NDVI DATA - sARA CODE BELOW, MOLLY CODE PULLING FROM RAW TAB DATA FOLLOWING THAT
 #gimms
+# #ndvi_data_raw <- get_bbs_gimms_ndvi()
+# ndvi_data_raw = read.csv("output/tabular_data/gimms_ndvi_bbs_data.csv", header = TRUE)
+# 
+# ndvi_data_summer <- ndvi_data_raw %>%
+#   filter(!is.na(ndvi), month %in% c('may', 'jun', 'jul'), year > 1981) %>%
+#   group_by(site_id, year) %>%
+#   summarise(ndvi_sum = mean(ndvi)) %>%
+#   ungroup()
+# 
+# ndvi_smr_mean = ndvi_data_summer %>% 
+#   group_by(site_id) %>%
+#   summarize(ndvi_sum = mean(ndvi_sum))
+# 
+# # Sara/Molly code:
+# #gimms_agg = gimms_ndvi %>% filter(month == c("may", "jun", "jul")) %>% 
+# #  group_by(site_id)  %>%  summarise(ndvi=mean(ndvi))
+
+
 #ndvi_gimms_raw <- get_bbs_gimms_ndvi()
 ndvi_gimms_raw = read.csv("intermed/ndvi_raw.csv") #Sara version, sourced from tabular data folder 
 

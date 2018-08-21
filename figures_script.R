@@ -273,9 +273,9 @@ all_figplot = ggplot(all_fig, aes(occ, group = area_f, color = area_f, linetype 
   #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
   labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()+
   scale_color_viridis(discrete = TRUE, name = expression("Spatial Scale in km"^{2}))+
-  theme(axis.title = element_text(size = 18), axis.text = element_text(size = 16))+
-  theme(legend.text = element_text(size = 16), legend.title = element_text(size = 16))+
-  theme(legend.position = c(0.50, 0.50))+guides(linetype = FALSE) #suppresses 2nd legend - find way to merge
+  theme(axis.title = element_text(size = 30), axis.text = element_text(size = 30, color = "black"))+
+  theme(legend.text = element_text(size = 30), legend.title = element_text(size = 30))+
+  theme(legend.position = c(0.50, 0.50))+guides(linetype = FALSE) + theme(legend.key = element_rect(size = 4, color = 'white'), legend.key.size = unit(2, 'lines'))
 all_figplot
 ggsave(file = "output/Figure4.tiff", plot = all_figplot)
 
@@ -341,7 +341,7 @@ pred_plot = ggplot(bbs_allscales, aes(x = logA, y = pctCore))+geom_line(aes(grou
   geom_line(data = bbs_allsub2, aes(x = logA, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
   labs(x = expression("Log"[10]*" Area"), y = "", title = "A")+
   scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
-  theme(plot.title = element_text(size = 20), axis.title = element_text(size = 18), axis.text = element_text(size = 16), legend.text = element_text(size = 14), legend.title = element_text(size = 14))+
+  theme(plot.title = element_text(size = 34), axis.title = element_text(size = 30), axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 28), legend.title = element_text(size = 30))+
   theme(legend.position = c(0.74, 0.18)) 
 pred_plot #yellow = high variation in habhet, purple = low variation, low habhet 
 
@@ -377,14 +377,14 @@ pred_abuns = ggplot(bbs_allscales, aes(x = logN, y = pctCore))+geom_line(aes(gro
   geom_line(data = bbs_allsub3, aes(x = logN, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
   labs(x = expression("Log"[10]*" Community Size"), y = "", title = "B")+
   scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
-  theme(plot.title = element_text(size = 20), axis.title = element_text(size = 18), axis.text = element_text(size = 16), legend.text = element_text(size = 14), legend.title = element_text(size = 14))+
+  theme(plot.title = element_text(size = 30), axis.title = element_text(size = 30), axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 30), legend.title = element_text(size = 30))+
   theme(legend.position = "none") 
 pred_abuns #yellow = high variation in habhet, purple = low variation, low habhet 
 
 
 p1 = gridExtra::grid.arrange(pred_plot, pred_abuns, ncol = 2, 
                   left = ggpubr::text_grob("Proportion Core Species in Community", 
-                                  rot = 90, vjust = 1, size = 18))
+                                  rot = 90, vjust = 1, size = 30))
 ggsave(file = "output/Figure5.tiff", plot = p1)
 
 ####Figure 6####
@@ -498,13 +498,13 @@ coefs_tidyN$parm = factor(coefs_tidyN$parm,
 
 ggplot(coefs_tidyA, aes(x = cutoff_lvl, y = parm_val))+
   geom_boxplot()+facet_wrap(~parm, scales = "free_y", labeller = label_parsed)+
-  theme_classic()+theme(text = element_text(size = 18))+
+  theme_classic()+theme(text = element_text(size = 30, color = "black"), axis.text = element_text(size = 30, color = "black"))+
   labs(x = "Proportion of Presence Required for Designation as Core", y = "Parameter values", title = "Parameters derived from proportion core-area scaling relationship")
 ggsave(file = "output/Figure8.tiff", plot = last_plot())
 
 ggplot(coefs_tidyN, aes(x = cutoff_lvl, y = parm_val))+
   geom_boxplot()+facet_wrap(~parm, scales = "free_y", labeller = label_parsed)+
-  theme_classic()+theme(text = element_text(size = 18))+
+  theme_classic()+theme(text = element_text(size = 30, color = "black"), axis.text = element_text(size = 30, color = "black"))+
   labs(x = "Proportion of Presence Required for Designation as Core", y = "Parameter values", title = "Parameters derived from proportion core-abundance scaling relationship")
 ggsave(file = "output/Figure9.tiff", plot = last_plot())
 
