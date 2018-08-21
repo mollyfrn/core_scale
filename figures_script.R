@@ -341,8 +341,11 @@ pred_plot = ggplot(bbs_allscales, aes(x = logA, y = pctCore))+geom_line(aes(grou
   geom_line(data = bbs_allsub2, aes(x = logA, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
   labs(x = expression("Log"[10]*" Area"), y = "", title = "A")+
   scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
-  theme(plot.title = element_text(size = 34), axis.title = element_text(size = 30), axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 28), legend.title = element_text(size = 30))+
-  theme(legend.position = c(0.74, 0.18)) 
+  theme(plot.title = element_text(size = 34), axis.title = element_text(size = 30), 
+        axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 28), 
+        legend.title = element_text(size = 30))+
+  theme(legend.position = c(0.74, 0.18), legend.key = element_rect(size = 4, color = 'white'),
+        legend.key.size = unit(2, 'lines')) 
 pred_plot #yellow = high variation in habhet, purple = low variation, low habhet 
 
 central2_alt = bbs_allscales %>%  
@@ -399,18 +402,20 @@ scales_hetero2 = scales_hetero %>%
 ggplot(scales_hetero2, aes(x = ind, y = corr_r))+
   geom_pointrange(aes(color = dep, shape = dep, ymin = lowr, ymax = uppr), size = 2.0, position = position_dodge(width = 0.5))+geom_abline(intercept = 0, slope = 0)+
   theme_classic()+theme(axis.title = element_text(size = 36), axis.text = element_text(size = 32, color = "black"), 
-                        legend.position = c(0.45, 0.3), legend.text = element_text(size = 30), 
+                        legend.position = c(0.80, 0.80), legend.text = element_text(size = 30), 
                         legend.title = element_text(size = 32), 
                         legend.key = element_rect(size = 4, color = 'white'),
+                        legend.box.background = element_rect(colour = "black", fill = 'white', size=1),
+                        legend.box.margin = margin(3, 2, 1, 2, 'lines'),
                         legend.key.size = unit(2, 'lines'))+
-  labs(x = "Occupancy-scale parameters", y = "Pearson's correlation coefficient")+
+  labs(x = "", y = "Pearson's correlation coefficient")+
   scale_x_discrete(limit = c("PCA.min", "PCA.mid","PCA.slope","PCA.curvature","PCA.max"),
                    labels = c(expression("p"["min"]), expression("scale"[50]),"slope","curvature",expression("p"["max"])))+
   scale_y_continuous(breaks = c(-0.6, -0.4, -0.2, 0, 0.2, 0.4))+
-  scale_color_manual(name = expression("Environmental \nHeterogeneity"),
+  scale_color_manual(name = expression("Environmental \nheterogeneity"),
                      values=c("#440154FF", "#55C667FF"),
                      labels = c("Elevation", "NDVI"))+
-  scale_shape_manual(name = expression("Environmental \nHeterogeneity"),
+  scale_shape_manual(name = expression("Environmental \nheterogeneity"),
                      values=c(16, 17),
                      labels = c("Elevation", "NDVI"))
 #likely #440154FF purple and #55C667FF
@@ -438,8 +443,9 @@ ggplot(scales_hetero_v, aes(x = scale, y = corr_r))+
                         legend.position = c(0.45, 0.3), legend.text = element_text(size = 30), 
                         legend.title = element_text(size = 32), 
                         legend.key = element_rect(size = 4, color = 'white'),
-                        legend.key.size = unit(2, 'lines'))+
-  labs(color = expression("Environmental \nHeterogeneity"), x = "Number of aggregated BBS Routes", y = "Pearson's correlation coefficient")+theme(legend.position = c(0.84, 0.20))+
+                        legend.key.size = unit(2, 'lines'),
+                        axis.title.x = element_text(margin = margin(1, 0, 0, 0, 'lines')))+
+  labs(color = expression("Environmental \nheterogeneity"), x = "Spatial scale (# BBS routes)", y = "Pearson's correlation coefficient")+theme(legend.position = c(0.84, 0.20))+
   scale_color_viridis(begin = 0, end = 0.7, discrete = TRUE, option = "D")+
   scale_y_continuous(breaks = c(-0.6, -0.4, -0.2, 0, 0.2, 0.4))
 ggsave(file = "output/Figure7.tiff", plot = last_plot())
