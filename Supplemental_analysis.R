@@ -176,4 +176,153 @@ test = bbs_below_guide %>%
 unique(test$seg)
 
 ###################################################################
+#right, so, I want to show species temporal occupancies and how those change with scale 
+#we would expect vultures/scavengers and falconiformes to be core at much higher scales than passeriformes 
+#given their reqs by life history for large foraging territories 
+#while we would expect passeriformes to reach core occs at lower scales onward and plateau earlier
+#given their smaller resource reqs, in spite of their capabilities for covering large dists 
+
+#Preliminary decision to group by ORDER within AOU codes as grouping variable bc easier to work with 
+#orders have common life history characterisitics and traits that may distinguish spp therein 
+#and lead to some orders being more or less likely to plateau at earlier/lower scales than others
+
+
+####Supplemental figures mirroring figs 4-6####
+
+####Plotting how CT distributions change across scale, using area####
+all_fig = read.csv("intermed/all_figoutput.csv", header = TRUE)
+#all_fig$area = as.factor(all_fig$area)
+all_fig$area_f = factor(round(all_fig$area),
+                        levels = c(3, 5, 13, 25, 50, 101, 201, 402, 804, 1659), 
+                        labels = c("2.5, 5 point count stops", "5", "13", "25, 1 BBS route", "50", "101", "201", "402", "804", "1659, 66 aggregate BBS routes")) 
+all_fig = all_fig %>% 
+  #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
+  mutate(area_spec = as.numeric(area_f))
+
+all_fig$area_spec[all_fig$area_spec != 4] <- 0
+
+all_fig$area_spec = factor(all_fig$area_spec)
+
+
+#make sure legend includes both color and dash 
+all_figplot = ggplot(all_fig, aes(occ, group = area_f, color = area_f, linetype = area_spec))+
+  stat_density(geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
+  #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
+  labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()+
+  scale_color_viridis(discrete = TRUE, name = expression("Spatial Scale in km"^{2}))+
+  theme(axis.title = element_text(size = 30), axis.text = element_text(size = 30, color = "black"))+
+  theme(legend.text = element_text(size = 30), legend.title = element_text(size = 30))+
+  theme(legend.position = c(0.50, 0.50))+guides(linetype = FALSE) + theme(legend.key = element_rect(size = 4, color = 'white'), legend.key.size = unit(2, 'lines'))
+all_figplot
+ggsave(file = "output/Figure4.tiff", plot = all_figplot)
+
+
+####Plotting NULL all routes with 3 highlighted "types####
+bbs_allscales = read.csv("intermed/bbs_allscales.csv", header = TRUE)
+bbs_allscales = bbs_allscales %>% 
+  dplyr::filter(logN != "NA")
+
+core_coefs = read.csv("intermed/core_coefs.csv", header = TRUE) #AUC etc.
+
+coefs_ranked = core_coefs %>% 
+  arrange(PCA.curvature) #middle teal line should be least curvy
+
+coefs_avgs = core_coefs %>% 
+  summarise_all(funs(mean, sd)) %>% 
+  mutate(focalrte = "99999") 
+
+
+#compare rtes in homogeneous vs heterogeneous regions, illustrate in color to prove point 
+env_all = read.csv("intermed/env_all.csv", header = TRUE) #AUC etc.
+ndvi_ranked = env_all %>% 
+  group_by(stateroute) %>% 
+  summarize(ndvi_m = mean(ndvi.var)) %>%
+  arrange(desc(ndvi_m)) 
+#lowest var in NDVI: rtes 72151, 72049, 72052, #mostly 72's and 2,000's 
+#highest var in NDVI: rtes 14059, 14140, 69253, 69021, 85011
+
+elev_ranked = env_all %>% 
+  group_by(stateroute) %>% 
+  summarize(elev_m = mean(elev.var)) %>%
+  arrange(desc(elev_m))
+#lowest var in elev: rtes 34027 (best, closest to normal avgs), mostly 34's, 35010, 
+#highest var in elev: rtes 17221, 6012, 17044, 6071, 85169, 14059 mostly 14's, 17's, and 6,000's
+
+central_alt = bbs_allscales %>%  
+  dplyr::select(logA, pctCore) %>% 
+  transmute(pctCore_m = rollapply(pctCore, width = 1, FUN = mean, na.rm = TRUE, fill = NULL),
+            logA = logA) %>% 
+  mutate(logA = round(logA, digits = 2)) %>%
+  group_by(logA) %>%
+  summarise(pctCore = mean(pctCore_m)) %>% 
+  mutate(focalrte = "99999", logA = logA) %>% 
+  dplyr::select(focalrte, logA, pctCore)
+
+bbs_allsub = bbs_allscales %>% 
+  filter(focalrte == 34054 | focalrte == 85169) %>%
+  dplyr::select(focalrte, logA, pctCore)
+
+bbs_allsub2 = rbind(bbs_allsub, central_alt)
+
+bbs_allsub2$focalrte = factor(bbs_allsub2$focalrte,
+                              levels=c( "99999","34054", "85169"),
+                              labels=c("Mean",
+                                       "Low Heterogeneity",
+                                       "High Heterogeneity"))
+#use this to assign diff colors for each factor level per what color scheme is ideal?
+#72 is PA, 14 is Cali, 34 is Illinois, 17 is Colorado 
+
+pred_plot = ggplot(bbs_allscales, aes(x = logA, y = pctCore))+geom_line(aes(group = focalrte), color = "grey")+
+  theme_classic()+geom_abline(aes(intercept = 0.5, slope = 0), linetype = "dashed")+
+  geom_line(data = bbs_allsub2, aes(x = logA, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
+  labs(x = expression("Log"[10]*" Area"), y = "", title = "A")+
+  scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
+  theme(plot.title = element_text(size = 34), axis.title = element_text(size = 30), 
+        axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 28), 
+        legend.title = element_text(size = 30))+
+  theme(legend.position = c(0.74, 0.18), legend.key = element_rect(size = 4, color = 'white'),
+        legend.key.size = unit(2, 'lines')) 
+pred_plot #yellow = high variation in habhet, purple = low variation, low habhet 
+
+central2_alt = bbs_allscales %>%  
+  dplyr::select(logN, pctCore) %>% 
+  transmute(pctCore_m = rollapply(pctCore, width = 1, FUN = mean, na.rm = TRUE, fill = NULL),
+            logN = logN) %>% 
+  mutate(logN = round(logN, digits = 1)) %>%
+  group_by(logN) %>%
+  summarise(pctCore = mean(pctCore_m)) %>% 
+  mutate(focalrte = "99999", logN = logN) %>% 
+  dplyr::select(focalrte, logN, pctCore)
+
+#calculate confidence intervals for central_alt and central2_alt vals
+
+
+bbs_allsub = bbs_allscales %>% 
+  filter(focalrte == 34054 | focalrte == 85169) %>%
+  dplyr::select(focalrte, logN, pctCore)
+
+bbs_allsub3 = rbind(bbs_allsub, central2_alt)
+
+bbs_allsub3$focalrte = factor(bbs_allsub3$focalrte,
+                              levels=c( "99999","34054", "85169"),
+                              labels=c("Mean",
+                                       "Low Heterogeneity",
+                                       "High Heterogeneity"))
+#use this to assign diff colors for each factor level per what color scheme is ideal?
+#72 is PA, 14 is Cali, 34 is Illinois, 17 is Colorado 
+
+pred_abuns = ggplot(bbs_allscales, aes(x = logN, y = pctCore))+geom_line(aes(group = focalrte), color = "grey")+
+  theme_classic()+geom_abline(aes(intercept = 0.5, slope = 0), linetype = "dashed")+
+  geom_line(data = bbs_allsub3, aes(x = logN, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
+  labs(x = expression("Log"[10]*" Community Size"), y = "", title = "B")+
+  scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
+  theme(plot.title = element_text(size = 30), axis.title = element_text(size = 30), axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 30), legend.title = element_text(size = 30))+
+  theme(legend.position = "none") 
+pred_abuns #yellow = high variation in habhet, purple = low variation, low habhet 
+
+
+p1 = gridExtra::grid.arrange(pred_plot, pred_abuns, ncol = 2, 
+                             left = ggpubr::text_grob("Proportion Core Species in Community", 
+                                                      rot = 90, vjust = 1, size = 30))
+ggsave(file = "output/Figure5.tiff", plot = p1)
 
