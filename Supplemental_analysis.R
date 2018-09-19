@@ -28,6 +28,10 @@ bbs50 = bbs50 %>%
   mutate(stateroute = as.integer(statenum*1000 + route)) #create unique state + route combo ID
 write.csv(bbs50, "intermed/bbs50.csv", row.names = FALSE)  
 
+#read in aou codes with orders for labeling and using as grouping vars later 
+bbs_names = bbs$breed_bird_survey_50stop_species
+write.csv(bbs_names, "intermed/bbs_names.csv", row.names = FALSE) 
+
 #smaller data file for testing (REMOVE WHEN FINISHED EDITS)
 #bbs50 = read.csv("fifty1.csv", header = TRUE)
 #routes = read.csv("routes.csv", header = TRUE)
@@ -330,8 +334,7 @@ write.csv(all_fig, "intermed/all_figoutput.csv", row.names = FALSE)
 
 ####Plotting how CT distributions change across scale, using AOU INSTEAD OF AREA####
 #download AOU code csv from BBS website/retriever list, join to all_fig but ONLY tack on order column 
-order_codes = read.table(file = "ftp://ftpext.usgs.gov/pub/er/md/laurel/BBS/DataFiles/SpeciesList.txt", sep = "", skip = 6, fill = TRUE)
-
+bbs_names = read.csv("intermed/bbs_names.csv", header = TRUE)  
 
 all_fig = read.csv("intermed/all_figoutput.csv", header = TRUE)
 #all_fig$area = as.factor(all_fig$area)
