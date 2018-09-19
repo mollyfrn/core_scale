@@ -335,12 +335,34 @@ write.csv(all_fig, "intermed/all_figoutput.csv", row.names = FALSE)
 ####Plotting how CT distributions change across scale, using AOU INSTEAD OF AREA####
 #download AOU code csv from BBS website/retriever list, join to all_fig but ONLY tack on order column 
 bbs_names = read.csv("intermed/bbs_names.csv", header = TRUE)  
+all_figout = read.csv("intermed/all_figoutput.csv", header = TRUE)
 
-all_fig = read.csv("intermed/all_figoutput.csv", header = TRUE)
+all_fig = all_figout %>% 
+  inner_join(bbs_names, by = aou) %>% 
+  select(stateroute, aou, occ, area, sporder, family) 
+
 #all_fig$area = as.factor(all_fig$area)
-all_fig$aou_f = factor(all_fig$aou),#want to bin by orders
-                        levels = c(3, 5, 13, 25, 50, 101, 201, 402, 804, 1659), 
-                        labels = c("2.5, 5 point count stops", "5", "13", "25, 1 BBS route", "50", "101", "201", "402", "804", "1659, 66 aggregate BBS routes")) 
+all_fig$order_f = factor(all_fig$sporder),#want to bin by orders, possibly by family within the passerines
+                        levels = c(), 
+                        labels = c("Anseriformes", "Galliformes", "Podicipediformes", "Columbiformes",
+                                   "Cuculiformes", "Caprimulgiformes", "Apodiformes", "Gruiformes",
+                                   "Charadriiformes", "Gaviiformes", "Procellariformes",
+                                    "Suliformes", "Pelicaniformes", "Cathartiformes", "Accipitriformes",
+                                    "Strigiformes", "Trogoniformes", "Coraciiformes", "Piciformes", 
+                                    "Falconiformes", "Psittaciformes", "Passeriformes")) 
+
+passerines = all_fig %>% 
+  filter(sporder = "Passeriformes")
+passerines$family_f = factor(passerines$family), 
+                        levels = c(), 
+                        labels = c("Tyrannidae", "Laniidae", "Vireonidae", "Corvidae", "Alaudidae", 
+                                  "Hirundindae", "Paridae", "Remizidae", "Aegithalidae", "Sittidae", 
+                                  "Certhiidae", "Troglodytidae", "Polioptilidae", "Cinclidae", 
+                                  "Regulidae", "Phylloscopidae", "Sylviidae", "Muscicapidae", 
+                                  "Turdidae", "Mimidae", "Stumidae", "Bombicyllidae", "Ptiliogonatidae",
+                                  "Peucedramidae", "Ploceidae", "Passeridae", "Motacillidae", 
+                                  "Fringillidae", "Calcariidae", "Passerellidae", "Emberizidae", 
+                                  "Icteridae", "Parulidae", "Cardinalidae")
 
 all_fig = all_fig %>% 
   #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
