@@ -347,6 +347,28 @@ passerines = all_fig %>%
   filter(sporder == "Passeriformes")
 write.csv(passerines, "intermed/passerines.csv", row.names = FALSE)
 
+
+all_fig = read.csv("intermed/all_fig_names.csv", header = TRUE)
+passerines = read.csv("intermed/passerines.csv", header = TRUE)
+
+
+#prelim, let's look at some box plots and then try to diagnose the density plot issue 
+ggplot(all_fig, aes(x = sporder, y = occ, color = sporder))+geom_boxplot()
+
+#calculate occupancy for the orders
+order_means = all_fig %>% 
+  group_by(sporder, area) %>% 
+  summarize(meanoccs = mean(occ))
+ggplot(order_means, aes(x = area, y = meanoccs, group = sporder, color = sporder))+geom_line()
+#need to remove duplicate 2 rte scale
+
+passrmeans = passerines %>% 
+  group_by(family, area) %>% 
+  summarize(meanoccs = mean(occ))
+ggplot(passrmeans, aes(x = area, y = meanoccs, group = family, color = family, shape = family))+geom_line()
+#also two icteridaes, FIX family levels, no probs w/sporder
+
+
 #all_fig$area = as.factor(all_fig$area)
 all_fig$order_f = factor(all_fig$sporder,#want to bin by orders, possibly by family within the passerines
 levels = c(), 
