@@ -338,31 +338,39 @@ bbs_names = read.csv("intermed/bbs_names.csv", header = TRUE)
 all_figout = read.csv("intermed/all_figoutput.csv", header = TRUE)
 
 all_fig = all_figout %>% 
-  inner_join(bbs_names, by = aou) %>% 
+  inner_join(bbs_names, by = "aou") %>% 
   select(stateroute, aou, occ, area, sporder, family) 
+write.csv(all_fig, "intermed/all_fig_names.csv", row.names = FALSE)
+
+#don't need to relabel levels or set order or fam as factors because they are already read in as factors :") 
+passerines = all_fig %>% 
+  filter(sporder == "Passeriformes")
+write.csv(passerines, "intermed/passerines.csv", row.names = FALSE)
 
 #all_fig$area = as.factor(all_fig$area)
-all_fig$order_f = factor(all_fig$sporder),#want to bin by orders, possibly by family within the passerines
-                        levels = c(), 
-                        labels = c("Anseriformes", "Galliformes", "Podicipediformes", "Columbiformes",
-                                   "Cuculiformes", "Caprimulgiformes", "Apodiformes", "Gruiformes",
-                                   "Charadriiformes", "Gaviiformes", "Procellariformes",
-                                    "Suliformes", "Pelicaniformes", "Cathartiformes", "Accipitriformes",
-                                    "Strigiformes", "Trogoniformes", "Coraciiformes", "Piciformes", 
-                                    "Falconiformes", "Psittaciformes", "Passeriformes")) 
+all_fig$order_f = factor(all_fig$sporder,#want to bin by orders, possibly by family within the passerines
+levels = c(), 
+labels = c("Anseriformes", "Galliformes", "Podicipediformes", "Columbiformes",
+           "Cuculiformes", "Caprimulgiformes", "Apodiformes", "Gruiformes",
+           "Charadriiformes", "Gaviiformes", "Procellariformes",
+           "Suliformes", "Pelicaniformes", "Cathartiformes", "Accipitriformes",
+           "Strigiformes", "Trogoniformes", "Coraciiformes", "Piciformes", 
+           "Falconiformes", "Psittaciformes", "Passeriformes")) 
 
 passerines = all_fig %>% 
   filter(sporder = "Passeriformes")
-passerines$family_f = factor(passerines$family), 
-                        levels = c(), 
-                        labels = c("Tyrannidae", "Laniidae", "Vireonidae", "Corvidae", "Alaudidae", 
-                                  "Hirundindae", "Paridae", "Remizidae", "Aegithalidae", "Sittidae", 
-                                  "Certhiidae", "Troglodytidae", "Polioptilidae", "Cinclidae", 
-                                  "Regulidae", "Phylloscopidae", "Sylviidae", "Muscicapidae", 
-                                  "Turdidae", "Mimidae", "Stumidae", "Bombicyllidae", "Ptiliogonatidae",
-                                  "Peucedramidae", "Ploceidae", "Passeridae", "Motacillidae", 
-                                  "Fringillidae", "Calcariidae", "Passerellidae", "Emberizidae", 
-                                  "Icteridae", "Parulidae", "Cardinalidae")
+
+passerines$family_f = factor(passerines$family, 
+levels = c(), 
+labels = c("Tyrannidae", "Laniidae", "Vireonidae", "Corvidae", "Alaudidae", 
+           "Hirundindae", "Paridae", "Remizidae", "Aegithalidae", "Sittidae", 
+           "Certhiidae", "Troglodytidae", "Polioptilidae", "Cinclidae", 
+           "Regulidae", "Phylloscopidae", "Sylviidae", "Muscicapidae", 
+           "Turdidae", "Mimidae", "Stumidae", "Bombicyllidae", "Ptiliogonatidae",
+           "Peucedramidae", "Ploceidae", "Passeridae", "Motacillidae", 
+           "Fringillidae", "Calcariidae", "Passerellidae", "Emberizidae", 
+           "Icteridae", "Parulidae", "Cardinalidae"))
+
 
 all_fig = all_fig %>% 
   #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
