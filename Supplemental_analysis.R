@@ -404,10 +404,22 @@ all_fig$area_spec = factor(all_fig$area_spec)
 
 
 #make sure legend includes both color and dash 
-all_figplot = ggplot(all_fig, aes(occ, group = area_f, color = area_f, linetype = area_spec))+
-  stat_density(geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
+all_figplot = ggplot(all_fig, aes(occ, group = sporder))+facet_wrap(~sporder)+
+  stat_density(geom = "path", position = "identity", bw = "nrd", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
   #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
-  labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()+
+  labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()
+all_figplot
+
+passr_plot = ggplot(passerines, aes(occ, group = family))+facet_wrap(~family)+
+  stat_density(geom = "path", position = "identity", bw = "nrd", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
+  #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
+  labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()
+passr_plot
+
+
+
+
++
   scale_color_viridis(discrete = TRUE, name = expression("Spatial Scale in km"^{2}))+
   theme(axis.title = element_text(size = 30), axis.text = element_text(size = 30, color = "black"))+
   theme(legend.text = element_text(size = 30), legend.title = element_text(size = 30))+
