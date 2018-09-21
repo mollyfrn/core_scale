@@ -351,20 +351,47 @@ write.csv(passerines, "intermed/passerines.csv", row.names = FALSE)
 all_fig = read.csv("intermed/all_fig_names.csv", header = TRUE)
 passerines = read.csv("intermed/passerines.csv", header = TRUE)
 
+#keep area in the mix bc interplay of scale/avian life history and ecology of diff orders is of import
+#all_fig$area = as.factor(all_fig$area)
+all_fig$area_f = factor(round(all_fig$area),
+                        levels = c(3, 5, 13, 25, 50, 101, 201, 402, 804, 1659), 
+                        labels = c("2.5, 5 point count stops", "5", "13", "25, 1 BBS route", "50", "101", "201", "402", "804", "1659, 66 aggregate BBS routes")) 
+all_fig = all_fig %>% 
+  #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
+  mutate(area_spec = as.numeric(area_f))
+
+all_fig$area_spec[all_fig$area_spec != 4] <- 0
+
+all_fig$area_spec = factor(all_fig$area_spec)
+
+#repeat for passerines: 
+passerines$area_f = factor(round(passerines$area),
+                        levels = c(3, 5, 13, 25, 50, 101, 201, 402, 804, 1659), 
+                        labels = c("2.5, 5 point count stops", "5", "13", "25, 1 BBS route", "50", "101", "201", "402", "804", "1659, 66 aggregate BBS routes")) 
+passerines = passerines %>% 
+  #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
+  mutate(area_spec = as.numeric(area_f))
+
+passerines$area_spec[passerines$area_spec != 4] <- 0
+
+passerines$area_spec = factor(passerines$area_spec)
+
 
 #prelim, let's look at some box plots and then try to diagnose the density plot issue 
 ggplot(all_fig, aes(x = sporder, y = occ, color = sporder))+geom_boxplot()
 
 #calculate occupancy for the orders
 order_means = all_fig %>% 
-  group_by(sporder, area) %>% 
-  summarize(meanoccs = mean(occ))
+  group_by(sporder, area_f) %>% 
+  summarize(meanoccs = mean(occ), 
+            pctCore = sum(occ > 2/3)/length(occ))
 ggplot(order_means, aes(x = area, y = meanoccs, group = sporder, color = sporder))+geom_line()
 #need to remove duplicate 2 rte scale
 
 passrmeans = passerines %>% 
-  group_by(family, area) %>% 
-  summarize(meanoccs = mean(occ))
+  group_by(family, area_f) %>% 
+  summarize(meanoccs = mean(occ), 
+            pctCore = sum(occ > 2/3)/length(occ))
 ggplot(passrmeans, aes(x = area, y = meanoccs, group = family, color = family, shape = family))+geom_line()
 #also two icteridaes, FIX family levels, no probs w/sporder
 
@@ -394,23 +421,14 @@ labels = c("Tyrannidae", "Laniidae", "Vireonidae", "Corvidae", "Alaudidae",
            "Icteridae", "Parulidae", "Cardinalidae"))
 
 
-all_fig = all_fig %>% 
-  #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
-  mutate(area_spec = as.numeric(area_f))
-
-all_fig$area_spec[all_fig$area_spec != 4] <- 0
-
-all_fig$area_spec = factor(all_fig$area_spec)
-
-
 #make sure legend includes both color and dash 
-all_figplot = ggplot(all_fig, aes(occ, group = sporder))+facet_wrap(~sporder)+
+all_figplot = ggplot(all_fig, aes(occ, group = area_f, color = area_f))+facet_wrap(~sporder)+
   stat_density(geom = "path", position = "identity", bw = "nrd", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
   #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
   labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()
 all_figplot
 
-passr_plot = ggplot(passerines, aes(occ, group = family))+facet_wrap(~family)+
+passr_plot = ggplot(passerines, aes(occ, group = area_f, color = area_f))+facet_wrap(~family)+
   stat_density(geom = "path", position = "identity", bw = "nrd", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
   #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
   labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()
