@@ -342,216 +342,71 @@ all_fig = all_figout %>%
   select(stateroute, aou, occ, area, sporder, family) 
 write.csv(all_fig, "intermed/all_fig_names.csv", row.names = FALSE)
 
-#don't need to relabel levels or set order or fam as factors because they are already read in as factors :") 
-passerines = all_fig %>% 
-  filter(sporder == "Passeriformes")
-write.csv(passerines, "intermed/passerines.csv", row.names = FALSE)
+#  Rather than the analysis you have conducted, 
+#  I think what gets more directly to the editor’s point would be 
+#  choosing a single focal route/region, 
+#  and plotting a line for temporal occupancy for 
+#  a large raptor species, 
+#  a woodpecker, and 
+#  a passerine. 
+#  That is, instead of plotting “% of core species”, 
+#  you are literally plotting the temporal occupancy values 
+#  for a species as calculated at different scales. 
+#  What we expect to show is that 
+#  the passerine line should lie above the woodpecker line 
+#  which should lie above the raptor, 
+#  making the point that the scale at which any one species becomes “core” 
+#  (i.e. exceeds 67% according to our definition) 
+#  depends on habitat use, body size, etc.
+# 
+#  I would make this a simple one panel supplementary figure. 
+#  Not sure the best place to reference this, 
+#  but it could be towards the end of the results, or in the Discussion. 
+#  See if you can find a relevant spot and I can let you know if it fits. 
 
+#so: Temporal Occupancy (0-1) vals across scales for an example focal rte
+#eg our good friend rte 2010 or something 
+# y = occ/mean_occ 
+# x = log10_area 
+# group & color = species 
 
-all_fig = read.csv("intermed/all_fig_names.csv", header = TRUE)
-passerines = read.csv("intermed/passerines.csv", header = TRUE)
+#^ filter and subset the df for the ggplot code above to 
+#only include reps where 3 AOUS all show up 
 
-#keep area in the mix bc interplay of scale/avian life history and ecology of diff orders is of import
-#all_fig$area = as.factor(all_fig$area)
-all_fig$area_f = factor(round(all_fig$area),
-                        levels = c(3, 5, 13, 25, 50, 101, 201, 402, 804, 1659), 
-                        labels = c("2.5, 5 point count stops", "5", "13", "25, 1 BBS route", "50", "101", "201", "402", "804", "1659, 66 aggregate BBS routes")) 
-all_fig = all_fig %>% 
-  #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
-  mutate(area_spec = as.numeric(area_f))
+#use alread-generated "all_fig_names.csv" file 
+#(use same steps in other supp file to create, 
+#paste in here but discard remainder of old supp r file)
 
-all_fig$area_spec[all_fig$area_spec != 4] <- 0
+####Read in all_fig file with aou codes, names, occs and area####
+all = read.csv("all_fig_names.csv", header = TRUE)
 
-all_fig$area_spec = factor(all_fig$area_spec)
+#subset to just 3 aou codes: a red tailed hawk, a downy woodpecker, 
+#and a somewhat common (but not too common!) passerine 
 
-#repeat for passerines: 
-passerines$area_f = factor(round(passerines$area),
-                        levels = c(3, 5, 13, 25, 50, 101, 201, 402, 804, 1659), 
-                        labels = c("2.5, 5 point count stops", "5", "13", "25, 1 BBS route", "50", "101", "201", "402", "804", "1659, 66 aggregate BBS routes")) 
-passerines = passerines %>% 
-  #first I have to take levels for area_f and lump everything together that isn't 50/25, 1 BBS route
-  mutate(area_spec = as.numeric(area_f))
+##red tailed hawk = 3370 or red shouldered hawk = 3390 (hard to misID, charismatic appearences)
+##downy woodpecker = 3940 or red-shafted northern flicker = 4130
+##chipping sparrow = 5600 or eastern towhee = 5870 (hard to misID calls)
 
-passerines$area_spec[passerines$area_spec != 4] <- 0
+#and filter to route 4010 
+topbirds = all %>% 
+  dplyr::filter(aou == 3370 | aou == 4120 | aou == 5600)%>% 
+  dplyr::filter(stateroute == 63010) #scales already pre-grouped into 10 bins
 
-passerines$area_spec = factor(passerines$area_spec)
+#add names for pretty & clear graph legend
+topbirds$aou = factor(topbirds$aou, 
+                         levels = c(3370, 5600, 4120), 
+                         labels = c("Red Tailed Hawk", "Chipping Sparrow", "Northern Flicker (yellow)"))
 
-
-#prelim, let's look at some box plots and then try to diagnose the density plot issue 
-ggplot(all_fig, aes(x = sporder, y = occ, color = sporder))+geom_boxplot()
-
-#calculate occupancy for the orders
-order_means = all_fig %>% 
-  group_by(sporder, area_f) %>% 
-  summarize(meanoccs = mean(occ), 
-            pctCore = sum(occ > 2/3)/length(occ))
-ggplot(order_means, aes(x = area, y = meanoccs, group = sporder, color = sporder))+geom_line()
-#need to remove duplicate 2 rte scale
-
-passrmeans = passerines %>% 
-  group_by(family, area_f) %>% 
-  summarize(meanoccs = mean(occ), 
-            pctCore = sum(occ > 2/3)/length(occ))
-ggplot(passrmeans, aes(x = area, y = meanoccs, group = family, color = family, shape = family))+geom_line()
-#also two icteridaes, FIX family levels, no probs w/sporder
-
-
-#all_fig$area = as.factor(all_fig$area)
-all_fig$order_f = factor(all_fig$sporder,#want to bin by orders, possibly by family within the passerines
-levels = c(), 
-labels = c("Anseriformes", "Galliformes", "Podicipediformes", "Columbiformes",
-           "Cuculiformes", "Caprimulgiformes", "Apodiformes", "Gruiformes",
-           "Charadriiformes", "Gaviiformes", "Procellariformes",
-           "Suliformes", "Pelicaniformes", "Cathartiformes", "Accipitriformes",
-           "Strigiformes", "Trogoniformes", "Coraciiformes", "Piciformes", 
-           "Falconiformes", "Psittaciformes", "Passeriformes")) 
-
-passerines = all_fig %>% 
-  filter(sporder = "Passeriformes")
-
-passerines$family_f = factor(passerines$family, 
-levels = c(), 
-labels = c("Tyrannidae", "Laniidae", "Vireonidae", "Corvidae", "Alaudidae", 
-           "Hirundindae", "Paridae", "Remizidae", "Aegithalidae", "Sittidae", 
-           "Certhiidae", "Troglodytidae", "Polioptilidae", "Cinclidae", 
-           "Regulidae", "Phylloscopidae", "Sylviidae", "Muscicapidae", 
-           "Turdidae", "Mimidae", "Stumidae", "Bombicyllidae", "Ptiliogonatidae",
-           "Peucedramidae", "Ploceidae", "Passeridae", "Motacillidae", 
-           "Fringillidae", "Calcariidae", "Passerellidae", "Emberizidae", 
-           "Icteridae", "Parulidae", "Cardinalidae"))
-
-
-#make sure legend includes both color and dash 
-all_figplot = ggplot(all_fig, aes(occ, group = area_f, color = area_f))+facet_wrap(~sporder)+
-  stat_density(geom = "path", position = "identity", bw = "nrd", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
-  #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
-  labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()
-all_figplot
-
-passr_plot = ggplot(passerines, aes(occ, group = area_f, color = area_f))+facet_wrap(~family)+
-  stat_density(geom = "path", position = "identity", bw = "nrd", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.3)+
-  #stat_density(singlerte, aes(occ), geom = "path", position = "identity", bw = "bcv", kernel = "gaussian", n = 4000, na.rm = TRUE, size = 1.6)+
-  labs(x = "Proportion of time present at site", y = "Probability Density")+theme_classic()
-passr_plot
-
-
-
-
-+
-  scale_color_viridis(discrete = TRUE, name = expression("Spatial Scale in km"^{2}))+
-  theme(axis.title = element_text(size = 30), axis.text = element_text(size = 30, color = "black"))+
-  theme(legend.text = element_text(size = 30), legend.title = element_text(size = 30))+
-  theme(legend.position = c(0.50, 0.50))+guides(linetype = FALSE) + theme(legend.key = element_rect(size = 4, color = 'white'), legend.key.size = unit(2, 'lines'))
-all_figplot
-ggsave(file = "output/Figure4.tiff", plot = all_figplot)
-
-
-####Plotting NULL all routes with 3 highlighted "types####
-bbs_allscales = read.csv("intermed/bbs_allscales.csv", header = TRUE)
-bbs_allscales = bbs_allscales %>% 
-  dplyr::filter(logN != "NA")
-
-core_coefs = read.csv("intermed/core_coefs.csv", header = TRUE) #AUC etc.
-
-coefs_ranked = core_coefs %>% 
-  arrange(PCA.curvature) #middle teal line should be least curvy
-
-coefs_avgs = core_coefs %>% 
-  summarise_all(funs(mean, sd)) %>% 
-  mutate(focalrte = "99999") 
-
-
-#compare rtes in homogeneous vs heterogeneous regions, illustrate in color to prove point 
-env_all = read.csv("intermed/env_all.csv", header = TRUE) #AUC etc.
-ndvi_ranked = env_all %>% 
-  group_by(stateroute) %>% 
-  summarize(ndvi_m = mean(ndvi.var)) %>%
-  arrange(desc(ndvi_m)) 
-#lowest var in NDVI: rtes 72151, 72049, 72052, #mostly 72's and 2,000's 
-#highest var in NDVI: rtes 14059, 14140, 69253, 69021, 85011
-
-elev_ranked = env_all %>% 
-  group_by(stateroute) %>% 
-  summarize(elev_m = mean(elev.var)) %>%
-  arrange(desc(elev_m))
-#lowest var in elev: rtes 34027 (best, closest to normal avgs), mostly 34's, 35010, 
-#highest var in elev: rtes 17221, 6012, 17044, 6071, 85169, 14059 mostly 14's, 17's, and 6,000's
-
-central_alt = bbs_allscales %>%  
-  dplyr::select(logA, pctCore) %>% 
-  transmute(pctCore_m = rollapply(pctCore, width = 1, FUN = mean, na.rm = TRUE, fill = NULL),
-            logA = logA) %>% 
-  mutate(logA = round(logA, digits = 2)) %>%
-  group_by(logA) %>%
-  summarise(pctCore = mean(pctCore_m)) %>% 
-  mutate(focalrte = "99999", logA = logA) %>% 
-  dplyr::select(focalrte, logA, pctCore)
-
-bbs_allsub = bbs_allscales %>% 
-  filter(focalrte == 34054 | focalrte == 85169) %>%
-  dplyr::select(focalrte, logA, pctCore)
-
-bbs_allsub2 = rbind(bbs_allsub, central_alt)
-
-bbs_allsub2$focalrte = factor(bbs_allsub2$focalrte,
-                              levels=c( "99999","34054", "85169"),
-                              labels=c("Mean",
-                                       "Low Heterogeneity",
-                                       "High Heterogeneity"))
-#use this to assign diff colors for each factor level per what color scheme is ideal?
-#72 is PA, 14 is Cali, 34 is Illinois, 17 is Colorado 
-
-pred_plot = ggplot(bbs_allscales, aes(x = logA, y = pctCore))+geom_line(aes(group = focalrte), color = "grey")+
-  theme_classic()+geom_abline(aes(intercept = 0.5, slope = 0), linetype = "dashed")+
-  geom_line(data = bbs_allsub2, aes(x = logA, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
-  labs(x = expression("Log"[10]*" Area"), y = "", title = "A")+
+S3 = ggplot(topbirds, aes(x = log10(area), y = occ, group = aou, color = aou))+geom_line(size = 2)+theme_classic()+
+  geom_abline(aes(intercept = 0.67, slope = 0), linetype = "dashed")+
+   labs(x = expression("Log"[10]*" Area"), y = "Temporal Occupancy")+
   scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
   theme(plot.title = element_text(size = 34), axis.title = element_text(size = 30), 
         axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 28), 
         legend.title = element_text(size = 30))+
   theme(legend.position = c(0.74, 0.18), legend.key = element_rect(size = 4, color = 'white'),
-        legend.key.size = unit(2, 'lines')) 
-pred_plot #yellow = high variation in habhet, purple = low variation, low habhet 
+        legend.key.size = unit(2, 'lines'))
+S3 
 
-central2_alt = bbs_allscales %>%  
-  dplyr::select(logN, pctCore) %>% 
-  transmute(pctCore_m = rollapply(pctCore, width = 1, FUN = mean, na.rm = TRUE, fill = NULL),
-            logN = logN) %>% 
-  mutate(logN = round(logN, digits = 1)) %>%
-  group_by(logN) %>%
-  summarise(pctCore = mean(pctCore_m)) %>% 
-  mutate(focalrte = "99999", logN = logN) %>% 
-  dplyr::select(focalrte, logN, pctCore)
-
-#calculate confidence intervals for central_alt and central2_alt vals
-
-
-bbs_allsub = bbs_allscales %>% 
-  filter(focalrte == 34054 | focalrte == 85169) %>%
-  dplyr::select(focalrte, logN, pctCore)
-
-bbs_allsub3 = rbind(bbs_allsub, central2_alt)
-
-bbs_allsub3$focalrte = factor(bbs_allsub3$focalrte,
-                              levels=c( "99999","34054", "85169"),
-                              labels=c("Mean",
-                                       "Low Heterogeneity",
-                                       "High Heterogeneity"))
-#use this to assign diff colors for each factor level per what color scheme is ideal?
-#72 is PA, 14 is Cali, 34 is Illinois, 17 is Colorado 
-
-pred_abuns = ggplot(bbs_allscales, aes(x = logN, y = pctCore))+geom_line(aes(group = focalrte), color = "grey")+
-  theme_classic()+geom_abline(aes(intercept = 0.5, slope = 0), linetype = "dashed")+
-  geom_line(data = bbs_allsub3, aes(x = logN, y = pctCore, group = as.factor(focalrte), color = as.factor(focalrte)), size = 2)+ #geom_smooth(model = lm, color = 'red')+
-  labs(x = expression("Log"[10]*" Community Size"), y = "", title = "B")+
-  scale_color_viridis(discrete = TRUE, name = "", option = "B", begin = 0.05, end = .75)+
-  theme(plot.title = element_text(size = 30), axis.title = element_text(size = 30), axis.text = element_text(size = 28, color = "black"), legend.text = element_text(size = 30), legend.title = element_text(size = 30))+
-  theme(legend.position = "none") 
-pred_abuns #yellow = high variation in habhet, purple = low variation, low habhet 
-
-
-p1 = gridExtra::grid.arrange(pred_plot, pred_abuns, ncol = 2, 
-                             left = ggpubr::text_grob("Proportion Core Species in Community", 
-                                                      rot = 90, vjust = 1, size = 30))
-ggsave(file = "output/Figure5.tiff", plot = p1)
+ggsave(file = "SuppFig3.tiff", plot = S3)
 
